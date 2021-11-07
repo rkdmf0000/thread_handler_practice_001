@@ -9,12 +9,21 @@ import android.R
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RelativeLayout
+import java.time.Duration
 
 
 interface AlertSectionInterface001 {
     public fun setContext(context: Context)
     public fun setInflater(inflater: LayoutInflater)
     public fun install(viewGroup: ViewGroup)
+
+    public fun makeText() : AlertSection.volatilities?
+}
+
+interface AlertSectionInterface002 {
+    public abstract fun show() : Unit
+    public abstract fun show(ms : Long) : Unit
 }
 
 object AlertSection {
@@ -24,7 +33,7 @@ object AlertSection {
 
     private var theSinglePrimaryThing : mother? = null
 
-    internal class mother : AlertSectionInterface001{
+    class mother : AlertSectionInterface001{
 
         public var m_inflater : LayoutInflater? = null
         public var m_context : Context? = null
@@ -74,8 +83,23 @@ object AlertSection {
             }
         }
 
-        private final fun generateTemporary() : Unit {
+        private final fun generateTemporary() : volatilities? {
+            try {
 
+                if (this.m_inflater == null)
+                    throw Exception("null_inflater")
+
+                if (this.m_context == null)
+                    throw Exception("null_context")
+
+                if (this.m_context != null)
+                    return volatilities(this.m_context!!)
+
+                throw Exception("default_error")
+            } catch (e : Exception) {
+                Log.e(TAG, e.toString())
+                return null
+            }
         }
 
         private fun _viewGroupInsertion(viewGroup: ViewGroup) : Unit {
@@ -93,9 +117,6 @@ object AlertSection {
             Log.i(TAG, "_viewGroupInsertion : ok")
         }
 
-        private fun _viewInjector() {
-
-        }
 
         public override fun setContext(context: Context) {
             this.m_context = null
@@ -111,6 +132,9 @@ object AlertSection {
             _viewGroupInsertion(viewGroup)
         }
 
+        override fun makeText(): volatilities? {
+            return generateTemporary()
+        }
 
 
         init {
@@ -118,17 +142,40 @@ object AlertSection {
         }
     }
 
-    internal class volatilities {
+    class volatilities(context: Context) : AlertSectionInterface002 {
+        public var is_enable : Boolean? = null
         public var is_visible : Boolean? = null
-        public var timer_ms : Int? = null
+        public var time_ms : Long? = null
+        public var time_at : Long? = null
+
+        public var m_group : RelativeLayout = RelativeLayout(context)
+
+        private fun _getCurrentTimeStamp() : Long {
+            return System.currentTimeMillis()
+        }
+
 
         init {
+            is_enable   = false
             is_visible  = false
-            timer_ms    = 0
+            time_ms     = 0
+            time_at     = 0
+        }
+
+        //네네치
+        override fun show() {
+            time_ms = 1000
+            time_at = _getCurrentTimeStamp()
+        }
+
+        //배먹어배
+        override fun show(ms : Long) {
+            time_ms = ms
+            time_at = _getCurrentTimeStamp()
         }
     }
 
-    internal fun getInstance(): mother? {
+    fun getInstance(): mother? {
         if (theSinglePrimaryThing == null) {
             theSinglePrimaryThing = mother()
         }
